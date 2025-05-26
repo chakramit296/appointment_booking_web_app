@@ -106,6 +106,14 @@ select:focus {
   outline: none;
 }
 
+#nameFeedback,
+#emailFeedback,
+#phoneFeedback,
+#datetimeFeedback {
+  margin: 0;
+  font-size: 0.9em;
+}
+
 /* Appointment List */
 #appointmentList .appointment-item {
   background: #f0f0f0;
