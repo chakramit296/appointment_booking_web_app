@@ -26,8 +26,10 @@
           id="name"
           name="name"
           required
-          placeholder="Enter your full name"
+          placeholder="[Firstname] [Lastname]"
           onblur="validateName('name', 'nameFeedback')"
+          maxlength="40"
+          autofocus
         />
         <p id="nameFeedback"></p>
 
@@ -37,8 +39,9 @@
           id="email"
           name="email"
           required
-          placeholder="Enter email (letters/numbers only)"
+          placeholder="Enter email"
           onblur="validateEmail('email', 'emailFeedback')"
+          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
         />
         <p id="emailFeedback"></p>
 
@@ -48,8 +51,9 @@
           id="phone"
           name="phone"
           required
-          placeholder="Enter 10-digit number"
+          placeholder="xxxxxxxxxx"
           onblur="validatePhoneNumber('phone', 'phoneFeedback')"
+          pattern="[0-9]{10}"
         />
         <p id="phoneFeedback"></p>
 
