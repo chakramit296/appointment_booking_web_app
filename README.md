@@ -41,6 +41,7 @@ Test mobile responsiveness using browser’s device mode.
 Light/Dark mode toggle works across all pages using localStorage.
 
 check it out here: https://chakramit296.github.io/appointment_booking_web_app/
+
 Use it freely for personal or educational projects.
 
 built by chakramit296 | 2025
