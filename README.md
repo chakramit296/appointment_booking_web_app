@@ -28,7 +28,7 @@ appointment_booking_web_app/
 
 1. Clone or Download:
    ```bash
-   git clone https://github.com/chakramit296/appointment_booking_web_app.git
+   git clone https://github.com/chakramit296.github.io/appointment_booking_web_app.git
    cd appointment_booking_app
 
 2.Open in Browser
