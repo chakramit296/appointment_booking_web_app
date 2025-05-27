@@ -15,12 +15,19 @@ A responsive, browser-based appointment booking interface built using HTML, CSS,
  📁 Folder Structure
 
 appointment_booking_web_app/
+
 ├── index.html (Home page)
+
 ├── form.html (Appointment form page)
+
 ├── confirmation.html (Confirmation page)
+
 ├── assets/
+
 │ ├── style.css (Stylesheet)
+
 │ └── script.js (JavaScript logic)
+
 └── readme.txt
 
 
