@@ -112,6 +112,7 @@ select:focus {
 #datetimeFeedback {
   margin: 0;
   font-size: 0.9em;
+  color: rgb(221, 2, 2);
 }
 
 /* Appointment List */
