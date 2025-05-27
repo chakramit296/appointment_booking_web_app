@@ -13,7 +13,7 @@
   </head>
   <body>
     <nav>
-      <a href="index.html"><i class="fa-solid fa-arrow-left-long"></i> Home</a>
+      <a href="index.html"><i class="fa-solid fa-arrow-left-long"></i>Home</a>
       <h1>Book an Appointment</h1>
       <button id="toggle-mode"><i class="fa-solid fa-moon"></i></button>
     </nav>
@@ -27,7 +27,6 @@
           name="name"
           required
           placeholder="[Firstname] [Lastname]"
-          onblur="validateName('name', 'nameFeedback')"
           maxlength="40"
           autofocus
         />
@@ -35,13 +34,11 @@
 
         <label for="email">Email:</label>
         <input
-          type="text"
+          type="email"
           id="email"
           name="email"
           required
           placeholder="Enter email"
-          onblur="validateEmail('email', 'emailFeedback')"
-          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
         />
         <p id="emailFeedback"></p>
 
@@ -52,19 +49,11 @@
           name="phone"
           required
           placeholder="xxxxxxxxxx"
-          onblur="validatePhoneNumber('phone', 'phoneFeedback')"
-          pattern="[0-9]{10}"
         />
         <p id="phoneFeedback"></p>
 
         <label for="datetime">Appointment Date & Time:</label>
-        <input
-          type="datetime-local"
-          id="datetime"
-          name="datetime"
-          required
-          onblur="validateDateTime('datetime', 'datetimeFeedback')"
-        />
+        <input type="datetime-local" id="datetime" name="datetime" required />
         <p id="datetimeFeedback"></p>
 
         <label for="service">Service:</label>
