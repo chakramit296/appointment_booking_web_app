@@ -1,117 +1,146 @@
-// ------------------ Theme Toggle ------------------
-function initThemeToggle() {
-  const toggleBtn = document.getElementById("toggle-mode");
-  if (!toggleBtn) return;
-
-  toggleBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    toggleBtn.textContent = document.body.classList.contains("dark-mode")
-      ? "☀️"
-      : "🌙";
-  });
-}
-
-// ------------------ Live Input Restrictions ------------------
+// ------------------ DOM Ready ------------------
 document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("appointmentForm");
   const nameInput = document.getElementById("name");
   const phoneInput = document.getElementById("phone");
+  const dateTimeInput = document.getElementById("datetime");
+
+  if (form) {
+    form.addEventListener("submit", handleSubmit);
+  }
 
   if (nameInput) {
-    nameInput.addEventListener("input", function () {
-      this.value = this.value.replace(/[^A-Za-z\s]/g, "");
+    nameInput.addEventListener("input", () => {
+      nameInput.value = nameInput.value.replace(/[^a-zA-Z\s]/g, "");
+      document.getElementById("nameFeedback").textContent = "";
     });
   }
 
   if (phoneInput) {
-    phoneInput.addEventListener("input", function () {
-      this.value = this.value.replace(/[^0-9]/g, "").slice(0, 10);
+    phoneInput.addEventListener("beforeinput", (e) => {
+      const char = e.data;
+      const current = phoneInput.value;
+      const selectionStart = phoneInput.selectionStart;
+      const nextValue =
+        current.slice(0, selectionStart) + char + current.slice(selectionStart);
+
+      // Allow deletion and nav keys
+      if (!char) return;
+
+      // Reject non-digit characters
+      if (!/^\d$/.test(char)) {
+        e.preventDefault();
+        return;
+      }
+
+      // Limit length to 10 digits
+      if (nextValue.length > 10) {
+        e.preventDefault();
+        return;
+      }
+
+      // Block if first digit is not 6–9
+      if (nextValue.length === 1 && !/^[6-9]$/.test(char)) {
+        e.preventDefault();
+        const feedback = document.getElementById("phoneFeedback");
+        feedback.textContent = "Number must start with 6, 7, 8, or 9.";
+        return;
+      }
+
+      // Clear feedback
+      document.getElementById("phoneFeedback").textContent = "";
+    });
+
+    phoneInput.addEventListener("input", () => {
+      phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 10);
     });
   }
+
+  if (dateTimeInput) {
+    // Set minimum datetime to now
+    function setMinDateTime() {
+      const now = new Date();
+      now.setSeconds(0, 0); // remove seconds and ms
+      const minDateTime = now.toISOString().slice(0, 16); // 'YYYY-MM-DDTHH:MM'
+      dateTimeInput.min = minDateTime;
+    }
+
+    setMinDateTime();
+    setInterval(setMinDateTime, 60000); // refresh every minute
+
+    dateTimeInput.addEventListener("blur", () => {
+      const selected = new Date(dateTimeInput.value);
+      const now = new Date();
+      const feedback = document.getElementById("datetimeFeedback");
+      if (selected <= now) {
+        feedback.textContent = "Select a future date and time.";
+        dateTimeInput.value = "";
+      } else {
+        feedback.textContent = "";
+      }
+    });
+  }
+
+  // Initialize
+  loadAppointments();
+  loadConfirmation();
 });
 
-// ------------------ Global Validation Functions ------------------
-function validateName(nameInputId, feedbackId) {
-  const name = document.getElementById(nameInputId).value.trim();
-  const feedback = document.getElementById(feedbackId);
-  const namePattern = /^[A-Za-z\s]+$/;
+// ------------------ Submit Handler ------------------
+function handleSubmit(e) {
+  e.preventDefault();
 
-  if (name === "") {
-    feedback.textContent = "Name cannot be empty.";
-    feedback.style.color = "red";
-    return false;
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const datetime = document.getElementById("datetime").value.trim();
+  const service = document.getElementById("service").value.trim();
+
+  if (!/^[a-zA-Z\s]+$/.test(name)) {
+    showError("nameFeedback", "Enter a valid name.");
+    return;
   }
 
-  if (!namePattern.test(name)) {
-    feedback.textContent = "Name must contain only letters and spaces.";
-    feedback.style.color = "red";
-    return false;
+  if (!/^[6-9]\d{9}$/.test(phone)) {
+    showError(
+      "phoneFeedback",
+      "Enter a valid 10-digit mobile number starting with 6-9."
+    );
+    return;
   }
 
-  feedback.textContent = "You're good to go.";
-  feedback.style.color = "green";
-  return true;
+  if (!/^[\w.%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    showError("emailFeedback", "Enter a valid email address.");
+    return;
+  }
+
+  if (!datetime || new Date(datetime) <= new Date()) {
+    showError("datetimeFeedback", "Select a future date and time.");
+    return;
+  }
+
+  if (!service) {
+    alert("Please select a service.");
+    return;
+  }
+
+  const appointment = { name, email, phone, datetime, service };
+
+  const allAppointments =
+    JSON.parse(localStorage.getItem("appointments")) || [];
+  allAppointments.push(appointment);
+  localStorage.setItem("appointments", JSON.stringify(allAppointments));
+  localStorage.setItem("currentAppointment", JSON.stringify(appointment));
+
+  window.location.href = "confirmation.html";
 }
 
-function validateEmail(emailInputId, feedbackId) {
-  const email = document.getElementById(emailInputId).value.trim();
-  const feedback = document.getElementById(feedbackId);
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-  if (email === "") {
-    feedback.textContent = "Email cannot be empty.";
-    feedback.style.color = "red";
-    return false;
+function showError(id, message) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = message;
+    el.style.color = "red";
   }
-
-  if (!emailPattern.test(email)) {
-    feedback.textContent = "Enter a valid email.";
-    feedback.style.color = "red";
-    return false;
-  }
-
-  feedback.textContent = "You're good to go.";
-  feedback.style.color = "green";
-  return true;
-}
-
-function validatePhoneNumber(phoneInputId, feedbackId) {
-  const phone = document.getElementById(phoneInputId).value.trim();
-  const feedback = document.getElementById(feedbackId);
-  const phonePattern = /^[6-9]\d{9}$/;
-
-  if (!phonePattern.test(phone)) {
-    feedback.textContent = "Invalid format. Enter a 10-digit Indian number.";
-    feedback.style.color = "red";
-    return false;
-  }
-
-  feedback.textContent = "You're good to go.";
-  feedback.style.color = "green";
-  return true;
-}
-
-function validateDateTime(datetimeInputId, feedbackId) {
-  const input = document.getElementById(datetimeInputId).value;
-  const feedback = document.getElementById(feedbackId);
-
-  if (!input) {
-    feedback.textContent = "Please select a date and time.";
-    feedback.style.color = "red";
-    return false;
-  }
-
-  const selectedDateTime = new Date(input);
-  const now = new Date();
-
-  if (selectedDateTime < now) {
-    feedback.textContent = "Please choose a future date and time.";
-    feedback.style.color = "red";
-    return false;
-  }
-
-  feedback.textContent = "Date & Time is valid.";
-  feedback.style.color = "green";
-  return true;
 }
 
 // ------------------ Load Appointments on Home Page ------------------
@@ -139,47 +168,10 @@ function loadAppointments() {
       .join("");
 }
 
-// ------------------ Form Submission Logic ------------------
-function setupFormSubmission() {
-  const form = document.getElementById("appointmentForm");
-  if (!form) return;
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const datetime = document.getElementById("datetime").value;
-    const service = document.getElementById("service").value;
-
-    const isNameValid = validateName("name", "nameFeedback");
-    const isPhoneValid = validatePhoneNumber("phone", "phoneFeedback");
-    const isEmailValid = validateEmail("email", "emailFeedback");
-    const isDateTimeValid = validateDateTime("datetime", "datetimeFeedback");
-
-    if (!isNameValid || !isPhoneValid || !isEmailValid || !isDateTimeValid) {
-      return;
-    }
-
-    const appointment = { name, email, phone, datetime, service };
-    const appointments = JSON.parse(localStorage.getItem("appointments")) || [];
-    appointments.push(appointment);
-
-    localStorage.setItem("appointments", JSON.stringify(appointments));
-    localStorage.setItem("currentAppointment", JSON.stringify(appointment));
-
-    window.location.href = "confirmation.html";
-  });
-}
-
 // ------------------ Load Confirmation Data ------------------
 function loadConfirmation() {
   const data = JSON.parse(localStorage.getItem("currentAppointment"));
-  if (!data) {
-    location.href = "index.html";
-    return;
-  }
+  if (!data) return;
 
   const map = {
     userName: data.name,
@@ -196,11 +188,11 @@ function loadConfirmation() {
   });
 }
 
-// ------------------ Global Initialization ------------------
-document.addEventListener("DOMContentLoaded", function () {
-  initThemeToggle();
-
-  if (document.getElementById("appointmentList")) loadAppointments();
-  if (document.getElementById("appointmentForm")) setupFormSubmission();
-  if (document.getElementById("confirmationPage")) loadConfirmation();
+// --- Dark Mode Toggle ---
+const toggleBtn = document.getElementById("toggle-mode");
+toggleBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  const icon = toggleBtn.querySelector("i");
+  icon.classList.toggle("fa-moon");
+  icon.classList.toggle("fa-sun");
 });
